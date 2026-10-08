@@ -1,24 +1,16 @@
-# ScopePay AI 0.1.0
+# ScopePay AI
 
-ScopePay AI is a browser-local proof of concept that checks a service brief for a concrete deliverable, acceptance criterion, boundary, privacy handling, amount and deadline before enabling a PayPal sandbox handoff.
+ScopePay AI checks a non-confidential service brief for scope, acceptance, deadline and privacy gaps before enabling a PayPal sandbox handoff.
 
-The embedded AI is a transparent TF-IDF similarity model trained on synthetic agreement concepts. It runs entirely in the browser and does not upload the brief. It is not legal advice, a fraud detector or a payment guarantee.
+- **Latest source:** [version 0.2.0](versions/0.2.0/) — local demo server plus optional PayPal sandbox OAuth and Orders v2 create/capture.
+- **Static preview:** https://joysky77.github.io/scopepay-ai/ — preserved 0.1.0 browser-only preview; it creates no transaction.
 
-## Run
+The project uses a transparent browser-local TF-IDF model. It is not legal advice, a fraud detector, a payment guarantee or an official PayPal product. Demo and sandbox funds are not income. No real-money mode is included.
 
-Open `index.html` in Microsoft Edge. Use only fictional or public text in the prototype.
+## Contest status
 
-## Current boundary
+This is a candidate project for the PayPal AI Hackathon. It is not registered, joined or submitted on Devpost as of this version.
 
-- Version 0.1.0 demonstrates the local AI agreement gate and a sandbox handoff state.
-- No real transaction is created or captured.
-- Before any contest submission, PayPal sandbox order creation must be connected with the account owner's sandbox client ID and tested end to end. A client secret must never appear in frontend code.
-- The project is independent and is not endorsed by PayPal.
+## License
 
-## Verification
-
-```powershell
-node Y:\Business\opportunities\paypal-ai-hackathon\scopepay-ai-v0.1.0\tests\verify.cjs
-```
-
-The test loads both synthetic examples in Edge, checks the readiness and risk gates, verifies the local-model API, and confirms the page makes no transaction request.
+MIT
