@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ScopePay AI checks a service brief for scope, acceptance, deadline and privacy gaps before a PayPal sandbox checkout is enabled.">
+  <title>ScopePay AI — agree before you pay</title>
+  <style>
+    :root{color-scheme:light;--ink:#101828;--muted:#5d6678;--bg:#f1f5f9;--card:#fff;--blue:#2563eb;--navy:#172554;--green:#047857;--amber:#b45309;--red:#b42318;--line:#d8dee9}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}.wrap{width:min(1120px,calc(100% - 32px));margin:auto}.top{display:flex;justify-content:space-between;align-items:center;padding:22px 0}.brand{font-weight:850;color:var(--navy);letter-spacing:.04em}.badge{background:#dbeafe;color:#1e40af;border-radius:999px;padding:5px 10px;font-size:.78rem;font-weight:800}.hero{background:linear-gradient(135deg,#172554,#1d4ed8);color:#fff;border-radius:24px;padding:clamp(28px,7vw,70px);box-shadow:0 22px 55px #17255426}.hero h1{font-size:clamp(2.7rem,7vw,5.3rem);line-height:.98;letter-spacing:-.055em;margin:.35rem 0 1rem;max-width:850px}.hero p{font-size:1.18rem;color:#dbeafe;max-width:760px}.hero strong{color:#fff}.layout{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;padding:26px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 8px 28px #1725540a}.card h2{margin:.1rem 0 .35rem}.muted{color:var(--muted)}label{display:block;font-weight:750;margin:14px 0 6px}textarea,input{width:100%;font:inherit;border:1px solid #bcc5d3;border-radius:9px;padding:11px;background:#fff}textarea{min-height:190px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}button{font:inherit;font-weight:780;border:0;border-radius:9px;padding:11px 16px;cursor:pointer}.primary{background:var(--blue);color:#fff}.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.48;cursor:not-allowed}.status{margin:15px 0 0;padding:12px;border-radius:9px;background:#eef2ff}.score{display:flex;align-items:end;gap:10px;margin:15px 0}.score strong{font-size:3rem;line-height:1}.meter{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden}.meter span{display:block;height:100%;width:0;background:var(--blue);transition:width .25s}.signals{display:grid;gap:9px;margin:16px 0}.signal{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:9px}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.checklist{padding-left:1.2rem}.checkout{border-top:1px solid var(--line);margin-top:20px;padding-top:18px}.checkout.locked{opacity:.65}.fingerprint{font:12px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f8fafc;padding:10px;border-radius:8px}.explain{margin-top:18px;background:#fffbeb;border-left:4px solid #f59e0b;padding:15px 17px;border-radius:8px}.fine{font-size:.84rem;color:var(--muted)}footer{padding:25px 0 45px;color:var(--muted);font-size:.88rem}.noscript{background:#fee2e2;padding:12px;text-align:center}@media(max-width:800px){.layout,.row{grid-template-columns:1fr}.hero{border-radius:18px}.top{align-items:flex-start}}
+    .order{display:none;margin-top:12px;padding:12px;border-radius:9px;background:#ecfdf5;color:#065f46;overflow-wrap:anywhere}.order a{color:#1d4ed8;font-weight:750}
+  </style>
+</head>
+<body>
+  <noscript><div class="noscript">ScopePay AI needs JavaScript to run the local classifier.</div></noscript>
+  <div class="wrap">
+    <header class="top"><div class="brand">SCOPEPAY AI</div><span id="mode-badge" class="badge">Checking local backend…</span></header>
+    <main>
+      <section class="hero">
+        <span class="badge">Private, explainable, browser-local AI</span>
+        <h1>Agree on the work before money moves.</h1>
+        <p>ScopePay AI reads a <strong>non-confidential service brief</strong>, finds missing acceptance terms and privacy risks, and unlocks a PayPal sandbox checkout only when the agreement is ready to review.</p>
+      </section>
+
+      <section class="layout">
+        <div class="card">
+          <h2>1. Describe the service</h2>
+          <p class="muted">Use fictional or public information in this prototype. Text stays in this browser tab.</p>
+          <label for="brief">Service brief</label>
+          <textarea id="brief" placeholder="What will be delivered, how it will be accepted, the deadline, and what is outside scope?"></textarea>
+          <div class="row">
+            <div><label for="amount">Amount, USD</label><input id="amount" type="number" min="1" max="10000" step="0.01" placeholder="25.00"></div>
+            <div><label for="deadline">Delivery date</label><input id="deadline" type="date"></div>
+          </div>
+          <div class="actions">
+            <button id="analyze" class="primary" type="button">Analyze agreement</button>
+            <button id="good-demo" class="secondary" type="button">Load ready example</button>
+            <button id="risk-demo" class="secondary" type="button">Load risky example</button>
+          </div>
+          <div id="status" class="status" role="status" aria-live="polite">Add a brief, amount and date to begin.</div>
+          <div class="explain"><strong>What “AI” means here:</strong> a transparent local TF-IDF similarity model compares the brief with labeled agreement concepts. It does not send prompts to a server, invent legal advice or decide whether a payment is safe.</div>
+        </div>
+
+        <div class="card">
+          <h2>2. Review the agreement gate</h2>
+          <div class="score"><strong id="score">—</strong><span class="muted">readiness score</span></div>
+          <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+          <div id="signals" class="signals"><div class="signal"><span>Waiting for analysis</span><strong>—</strong></div></div>
+          <h3>Before checkout</h3>
+          <ul id="checklist" class="checklist"><li>Describe one concrete deliverable.</li><li>State how the buyer accepts it.</li><li>Add a deadline and amount.</li><li>Remove credentials and private records.</li></ul>
+          <p class="fine">Agreement fingerprint</p>
+          <div id="fingerprint" class="fingerprint">Not generated</div>
+          <div id="checkout" class="checkout locked">
+            <h3>3. PayPal sandbox</h3>
+            <p id="checkout-note" class="muted">Checkout stays locked until the review gate passes. Sandbox transactions move no real money.</p>
+            <button id="sandbox-button" class="primary" type="button" disabled>Start sandbox checkout</button>
+            <div id="order-result" class="order" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>ScopePay AI 0.2.0 · PayPal sandbox integration · No legal, security or payment guarantee · PayPal is a trademark of PayPal, Inc.; this independent prototype is not endorsed by PayPal.</footer>
+  </div>
+  <script>
+  (()=>{
+    'use strict';
+    const $=id=>document.getElementById(id);let backend={mode:'unavailable',configured:false},currentOrder=null,phase='create';
+    const concepts={
+      deliverable:['deliver file report source code cleaned csv dashboard document working prototype export copy audit'],
+      acceptance:['acceptance criteria verify test passes approved matches agreed review correction revision'],
+      boundary:['out of scope excludes not included limit only maximum one file no xlsx'],
+      privacy:['fictional public redacted no confidential private exchange do not include credentials'],
+      dangerous:['password secret api key token credential customer records personal data private file bank card']
+    };
+    const stop=new Set('a an and are as at be by for from has have in into is it of on one or the this to up with will'.split(' '));
+    function tokens(text){return (text.toLowerCase().match(/[a-z0-9]+|[\u3400-\u9fff]+/g)||[]).filter(x=>x.length>1&&!stop.has(x));}
+    const docs=Object.values(concepts).flatMap(v=>v).map(tokens),df={};docs.forEach(d=>new Set(d).forEach(t=>df[t]=(df[t]||0)+1));
+    function vector(text){const ts=tokens(text),tf={};ts.forEach(t=>tf[t]=(tf[t]||0)+1);const v={};Object.entries(tf).forEach(([t,n])=>v[t]=(n/Math.max(ts.length,1))*(Math.log((docs.length+1)/((df[t]||0)+1))+1));return v;}
+    function cosine(a,b){let dot=0,aa=0,bb=0;Object.values(a).forEach(x=>aa+=x*x);Object.values(b).forEach(x=>bb+=x*x);Object.entries(a).forEach(([k,x])=>dot+=x*(b[k]||0));return aa&&bb?dot/Math.sqrt(aa*bb):0;}
+    const prototypes=Object.fromEntries(Object.entries(concepts).map(([k,v])=>[k,vector(v.join(' '))]));
+    function explicitRisk(text){const cleaned=text.replace(/(?:without|no|never\s+(?:post|include|share)|do not\s+(?:post|include|share))\s+(?:any\s+)?(?:passwords?|secrets?|api\s*keys?|tokens?|credentials?|customer\s*records?|private\s*files?)/gi,'');return /(password|secret|api\s*key|token|credential|card\s*number|customer\s*records?|身份证|密码|密钥|令牌|客户资料|银行卡)/i.test(cleaned);}
+    function scoreBrief(text,amount,deadline){
+      const v=vector(text),s={};for(const k of Object.keys(prototypes))s[k]=cosine(v,prototypes[k]);
+      const found={deliverable:s.deliverable>.055,acceptance:s.acceptance>.035,boundary:s.boundary>.04,privacy:s.privacy>.035,amount:Number(amount)>0,deadline:Boolean(deadline)};
+      const risk=explicitRisk(text);
+      const weights={deliverable:24,acceptance:22,boundary:14,privacy:10,amount:15,deadline:15};
+      let total=Object.entries(weights).reduce((n,[k,w])=>n+(found[k]?w:0),0);if(risk)total=Math.min(total,45);
+      return {similarities:s,found,risk,score:total,ready:total>=85&&!risk};
+    }
+    async function digest(text){if(crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}return 'unavailable-on-this-origin';}
+    function signal(label,ok,bad=false){return `<div class="signal"><span>${label}</span><strong class="${ok?'ok':bad?'bad':'warn'}">${ok?'Ready':bad?'Remove':'Missing'}</strong></div>`;}
+    async function analyze(){
+      const text=$('brief').value.trim(),amount=$('amount').value,deadline=$('deadline').value;
+      if(text.length<30){$('status').textContent='Add at least 30 characters describing the service.';return;}
+      const r=scoreBrief(text,amount,deadline),f=r.found;
+      $('score').textContent=`${r.score}%`;$('meter').style.width=`${r.score}%`;
+      $('signals').innerHTML=signal('Concrete deliverable',f.deliverable)+signal('Acceptance or test',f.acceptance)+signal('Scope boundary',f.boundary)+signal('Privacy handling',f.privacy)+signal('Amount',f.amount)+signal('Deadline',f.deadline)+signal('Credentials or private records absent',!r.risk,r.risk);
+      const missing=[];if(!f.deliverable)missing.push('Name the exact file, report or working result.');if(!f.acceptance)missing.push('Add a test or acceptance criterion.');if(!f.boundary)missing.push('State at least one limit or excluded item.');if(!f.privacy)missing.push('Say how private data will be kept out of public channels.');if(!f.amount)missing.push('Enter a positive USD amount.');if(!f.deadline)missing.push('Choose a delivery date.');if(r.risk)missing.push('Remove credentials or private records before continuing.');
+      $('checklist').innerHTML=(missing.length?missing:['Review the generated terms with the other party before paying.']).map(x=>`<li>${x}</li>`).join('');
+      const canonical=JSON.stringify({brief:text.replace(/\s+/g,' '),amount:Number(amount||0).toFixed(2),deadline,model:'scopepay-tfidf-0.2.0'});$('fingerprint').textContent=await digest(canonical);
+      currentOrder=null;phase='create';$('order-result').style.display='none';$('sandbox-button').textContent='Start sandbox checkout';
+      const backendReady=backend.mode==='demo'||backend.mode==='sandbox';$('checkout').classList.toggle('locked',!r.ready||!backendReady);$('sandbox-button').disabled=!r.ready||!backendReady;
+      $('checkout-note').textContent=!backendReady?'Run server.py to enable the demo or PayPal sandbox backend.':r.ready?`Gate passed. ${backend.mode==='sandbox'?'A PayPal sandbox order can now be created.':'A local demo order can now be created; no PayPal request is sent.'}`:'Checkout remains locked until the missing terms are resolved.';
+      $('status').textContent=r.ready?'Agreement gate passed. Review the terms before opening the sandbox.':`Review needed: ${missing.length} item${missing.length===1?'':'s'} remain.`;
+      window.__lastAnalysis=r;
+    }
+    $('analyze').addEventListener('click',analyze);
+    $('good-demo').addEventListener('click',()=>{$('brief').value='Deliver one UTF-8 CSV copy and a JSON audit report. Acceptance: the output opens with 10 data rows and every changed cell appears in the report. Only one comma-delimited file up to 5 MB is included; XLSX and custom business rules are out of scope. Use fictional examples publicly and arrange any private exchange separately without credentials.';$('amount').value='12.00';$('deadline').value='2026-10-15';analyze();});
+    $('risk-demo').addEventListener('click',()=>{$('brief').value='Fix everything quickly. I will paste the customer records, password and API key here. We can decide what done means later.';$('amount').value='12.00';$('deadline').value='';analyze();});
+    async function callApi(path,payload){const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.message||`Request failed (${response.status})`);return data;}
+    function renderOrder(order,showApproval=false){
+      const box=$('order-result');box.replaceChildren();box.style.display='block';
+      const label=document.createElement('strong');label.textContent=`${order.mode==='demo'?'Demo':'PayPal sandbox'} order:`;box.append(label,document.createTextNode(` ${order.id}`),document.createElement('br'),document.createTextNode(`Status: ${order.status}`));
+      if(showApproval&&order.approve_url){const br=document.createElement('br'),link=document.createElement('a');link.href=order.approve_url;link.target='_blank';link.rel='noopener';link.textContent='Approve in PayPal sandbox →';box.append(br,link);}
+    }
+    async function checkout(){
+      if($('sandbox-button').disabled)return;$('sandbox-button').disabled=true;
+      try{
+        if(phase==='create'){
+          const order=await callApi('/api/orders',{amount:$('amount').value,fingerprint:$('fingerprint').textContent});currentOrder=order;phase='capture';
+          renderOrder(order,true);
+          $('sandbox-button').textContent=order.mode==='demo'?'Complete demo order':'Capture after sandbox approval';$('sandbox-button').disabled=false;
+          $('status').textContent=order.mode==='demo'?'Demo order created locally. It is not a PayPal transaction.':'PayPal sandbox order created. Approve it with a sandbox buyer before capture.';
+        }else{
+          const order=await callApi(`/api/orders/${encodeURIComponent(currentOrder.id)}/capture`,{});currentOrder=order;phase='done';
+          renderOrder(order);$('sandbox-button').textContent='Order completed';$('sandbox-button').disabled=true;
+          $('status').textContent=order.mode==='demo'?'Demo flow completed. No PayPal request or real payment occurred.':'PayPal sandbox capture completed. Sandbox funds are not real income.';
+        }
+      }catch(error){$('status').textContent=`Checkout error: ${error.message}`;$('sandbox-button').disabled=false;}
+    }
+    async function loadBackend(){try{const response=await fetch('/api/status',{cache:'no-store'});if(!response.ok)throw Error('status');backend=await response.json();$('mode-badge').textContent=backend.mode==='sandbox'?'PayPal sandbox configured':'Local demo backend · no real money';}catch{backend={mode:'unavailable',configured:false};$('mode-badge').textContent='Run server.py to enable checkout';}}
+    $('sandbox-button').addEventListener('click',checkout);loadBackend();
+    window.ScopePay={tokens,vector,cosine,scoreBrief,version:'0.2.0',getBackend:()=>backend};
+  })();
+  </script>
+</body>
+</html>
